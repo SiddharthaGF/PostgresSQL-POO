@@ -1,56 +1,20 @@
 <?php
-$PadLeft = new Func("PadLeft", function($value = null, $length = null) {
-  $PadLeft = Func::getCurrent();
-  return get(call_method($value, "toString"), "length") < $length ? call($PadLeft, _concat("0", $value), $length) : $value;
+$Datos_5 = new Func("Datos_5", function() use (&$document, &$General) {
+  $a = get(call_method($document, "getElementById", "ax2"), "value");
+  $b = get(call_method($document, "getElementById", "bx"), "value");
+  $c = get(call_method($document, "getElementById", "c"), "value");
+  $raices = call($General, $a, $b, $c);
+  set(call_method($document, "getElementById", "x1"), "innerHTML", get($raices, 0.0));
+  set(call_method($document, "getElementById", "x2"), "innerHTML", get($raices, 1.0));
 });
-$Datos = new Func("Datos", function() use (&$document, &$ValidarAlturaProyeccion, &$CalcAngulo, &$AnguloHorasMinutos, &$AnguloToHora) {
-  $altura = get(call_method($document, "getElementById", "altura"), "value");
-  $proyeccion = get(call_method($document, "getElementById", "proyeccion"), "value");
-  if (is(call($ValidarAlturaProyeccion, $altura, $proyeccion))) {
-    $angulo = call($CalcAngulo, $altura, $proyeccion);
-    set(call_method($document, "getElementById", "angulo"), "innerHTML", call($AnguloHorasMinutos, $angulo));
-    set(call_method($document, "getElementById", "hora"), "innerHTML", call($AnguloToHora, $angulo));
+$General = new Func("General", function($a = null, $b = null, $c = null) use (&$Math, &$alert) {
+  $discrimiante = call_method($Math, "sqrt", to_number(call_method($Math, "pow", $b, 2.0)) - 4.0 * to_number($a) * to_number($c));
+  if ($discrimiante >= 0.0) {
+    $x1 = _divide(_plus(_negate($b), $discrimiante), 2.0 * to_number($a));
+    $x2 = _divide((_negate($b) - to_number($discrimiante)), 2.0 * to_number($a));
+    return new Arr(call_method($x1, "toFixed", 4.0), call_method($x2, "toFixed", 4.0));
+  } else {
+    call($alert, "El discrimiante es menor a 0, no existe una soluci\xC3\xB3n para la funci\xC3\xB3n");
+    return Object::$null;
   }
 });
-$ValidarAlturaProyeccion = new Func("ValidarAlturaProyeccion", function($altura = null, $proyeccion = null) use (&$document, &$alert) {
-  if ($proyeccion < 0.0) {
-    set(call_method($document, "getElementById", "proyeccion"), "value", "0");
-    call($alert, "No se puede ingresar valores negativos");
-    return false;
-  }
-  if ($proyeccion > 1000000.0) {
-    set(call_method($document, "getElementById", "proyeccion"), "value", "1000000");
-    call($alert, "No se puede ingresar mayores a 1 mill\xC3\xB3n");
-    return false;
-  }
-  if ($altura < 1.0) {
-    set(call_method($document, "getElementById", "altura"), "value", "1");
-    call($alert, "La altura no puede ser 0");
-    return false;
-  }
-  if ($altura > 1000000.0) {
-    set(call_method($document, "getElementById", "altura"), "value", "1000000");
-    call($alert, "No se puede ingresar mayores a 1 mill\xC3\xB3n");
-    return false;
-  }
-  return true;
-});
-$AnguloHorasMinutos = new Func("AnguloHorasMinutos", function($grados = null) use (&$parseInt, &$Math, &$PadLeft) {
-  $minutos = (to_number($grados) - to_number(call($parseInt, $grados))) * 60.0;
-  $segundos = (to_number($minutos) - to_number(call($parseInt, $minutos))) * 60.0;
-  return _concat(call_method($Math, "trunc", $grados), "\xC2\xB0 ", 
-                 call($PadLeft, call_method($Math, "trunc", $minutos), 2.0), "' ", 
-                 call($PadLeft, call_method($Math, "trunc", $segundos), 2.0), "''");
-});
-$AnguloToHora = new Func("AnguloToHora", function($angulo = null) use (&$document, &$parseInt, &$PadLeft, &$Math) {
-  $hora = is(get(call_method($document, "getElementById", "este"), "checked")) ? _plus(6.0, _divide($angulo, 15.0)) : (18.0 - _divide($angulo, 15.0));
-  $minutos = (to_number($hora) - to_number(call($parseInt, $hora))) * 60.0;
-  $segundos = (to_number($minutos) - to_number(call($parseInt, $minutos))) * 60.0;
-  return _concat(call($PadLeft, call_method($Math, "trunc", $hora), 2.0), ":", 
-                 call($PadLeft, call_method($Math, "trunc", $minutos), 2.0), "' ", 
-                 call($PadLeft, call_method($Math, "trunc", $segundos), 2.0), "''");
-});
-$CalcAngulo = new Func("CalcAngulo", function($altura = null, $base = null) use (&$Math) {
-  return to_number(call_method($Math, "atan", _divide($altura, $base))) * _divide(180.0, get($Math, "PI"));
-});
-
