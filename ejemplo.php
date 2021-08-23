@@ -1,20 +1,42 @@
 <?php
-$Datos_5 = new Func("Datos_5", function() use (&$document, &$General) {
-  $a = get(call_method($document, "getElementById", "ax2"), "value");
-  $b = get(call_method($document, "getElementById", "bx"), "value");
-  $c = get(call_method($document, "getElementById", "c"), "value");
-  $raices = call($General, $a, $b, $c);
-  set(call_method($document, "getElementById", "x1"), "innerHTML", get($raices, 0.0));
-  set(call_method($document, "getElementById", "x2"), "innerHTML", get($raices, 1.0));
-});
-$General = new Func("General", function($a = null, $b = null, $c = null) use (&$Math, &$alert) {
-  $discrimiante = call_method($Math, "sqrt", to_number(call_method($Math, "pow", $b, 2.0)) - 4.0 * to_number($a) * to_number($c));
-  if ($discrimiante >= 0.0) {
-    $x1 = _divide(_plus(_negate($b), $discrimiante), 2.0 * to_number($a));
-    $x2 = _divide((_negate($b) - to_number($discrimiante)), 2.0 * to_number($a));
-    return new Arr(call_method($x1, "toFixed", 4.0), call_method($x2, "toFixed", 4.0));
-  } else {
-    call($alert, "El discrimiante es menor a 0, no existe una soluci\xC3\xB3n para la funci\xC3\xB3n");
-    return Object::$null;
+$iniciar = new Func("iniciar", function($event = null) use (&$respuesta) {
+  for ($i = get($event, "resultIndex"); $i < get(get($event, "results"), "length"); $i++) {
+    set($respuesta, "innerHTML", get(get(get(get($event, "results"), $i), 0.0), "transcript"));
   }
 });
+$CapturarTexto = new Func("CapturarTexto", function() use (&$boton, &$boton_13, &$rec_13, &$iniciar, &$respuesta_1, &$respuesta_2, 
+                                                           &$window, &$alert, &$rec, &$webkitSpeechRecognition, &$respuesta) {
+  if (get($boton, "value") === "Escuchar") {
+    if (get($boton_13, "value") === "Detener") {
+      call_method($rec_13, "stop");
+      call_method($rec_13, "removeEventListener", "result", $iniciar);
+      set(get($boton_13, "style"), "backgroundColor", "#1e90ff");
+      set($boton_13, "value", "Escuchar");
+      set($respuesta_1, "innerHTML", "Clic para empezar a escuchar");
+      set($respuesta_2, "innerHTML", "");
+    }
+    if (!_in("webkitSpeechRecognition", $window)) {
+      call($alert, "App no compatible,use otro navegador");
+    } else {
+      $rec = _new($webkitSpeechRecognition);
+      set($rec, "lang", "es-EC");
+      set($rec, "continuous", true);
+      set($rec, "interim", true);
+      call_method($rec, "addEventListener", "result", $iniciar);
+      call_method($rec, "start");
+      set(get($boton, "style"), "backgroundColor", "#FF0000");
+      set($boton, "value", "Detener");
+      set($respuesta, "innerHTML", "Escuchando...");
+    }
+
+  } else {
+    call_method($rec, "stop");
+    call_method($rec, "removeEventListener", "result", $iniciar);
+    set(get($boton, "style"), "backgroundColor", "#1e90ff");
+    set($boton, "value", "Escuchar");
+    set($respuesta, "innerHTML", "Clic para empezar a escuchar");
+  }
+
+});
+$boton = call_method($document, "querySelector", "#capturar_12");
+$respuesta = call_method($document, "querySelector", "#texto");
